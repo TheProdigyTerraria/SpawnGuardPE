@@ -1,0 +1,7 @@
+"I will not be developing any plugins, as I have lost my main dev pc, and all I have to develop on is a plugin, I apologize for any inconvenience, as I wished to keep developing. But The Prodigy may be taking over, thank you." - Huey.
+
+I am The Prodigy, and I have officially taken over the SpawnGuard project, originally created by Huey. I have created the ability for y axis support, so you may protect a rectangle of area, instead of a column. This is useful if you don't want the area all the way below or above your spawn to be protected. I have also added more information in the messages. I am trying to keep it as original to Huey's vision as possible. Check it out, and as always, enjoy!
+
+/spawnstart - Makes the next block you break the west boundary. Make sure you save.
+/spawnend - Makes the next block you break the east boundary. Make sure you save.
+/spawnsave - Saves the customization to the Settings.xml file

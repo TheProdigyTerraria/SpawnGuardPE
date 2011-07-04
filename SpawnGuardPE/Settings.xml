@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <spawnxstart>1980</spawnxstart>
+  <spawnxend>2107</spawnxend>
+  <spawnystart>1980</spawnystart>
+  <spawnyend>2107</spawnyend>
+  <warntext>Destroying spawn is forbidden!</warntext>
+</settings>
