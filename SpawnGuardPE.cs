@@ -32,17 +32,16 @@ namespace SpawnGuardPE
         {
             Name = "SpawnGuardPE";
             Description = "Protects your spawn area.";
-            Author = "Huey (The Prodigy)";
+            Author = "Huey";
             Version = "1";
-            TDSMBuild = 19;//Create folder if it doesn't exist
-            CreateDirectory(pluginFolder);
-            XmlDocument xmlDocu = new XmlDocument();
-            xmlDocu.Load(pluginFolder + "/Permissions.xml");
-            XmlNodeList playerpermxml = xmlDocu.GetElementsByTagName("playerperm");
+            TDSMBuild = 19;
+            XmlDocument xmlDocp = new XmlDocument();
+            xmlDocp.Load(pluginFolder + Path.DirectorySeparatorChar + "Permissions.xml");
+            XmlNodeList playerpermxml = xmlDocp.GetElementsByTagName("playerperm");
             playerpermission = playerpermxml[0].InnerText.ToString();
             //break
             XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.Load(pluginFolder + "/Settings.Xml");
+            xmlDoc.Load(pluginFolder + Path.DirectorySeparatorChar + "Settings.xml");
             XmlNodeList startxxml = xmlDoc.GetElementsByTagName("spawnxstart");
             XmlNodeList endxxml = xmlDoc.GetElementsByTagName("spawnxend");
             XmlNodeList startyxml = xmlDoc.GetElementsByTagName("spawnystart");
@@ -84,7 +83,7 @@ namespace SpawnGuardPE
                 {
                     if (commands[0] != null && commands[0].Trim().Length > 0) //If it is not nothing, and the string is actually something
                     {
-                        if (commands[0] == "/perm" && Event.Sender.Op)
+                        if (commands[0] == "/perms" && Event.Sender.Op)
                         {
                             permtarget = commands[1];
                             permtargetgroup = commands[2];
@@ -113,6 +112,15 @@ namespace SpawnGuardPE
                             xmlWriter.WriteElementString(Event.Player.getName(), playerperm);
                             xmlWriter.WriteEndElement();
                             xmlWriter.Close();
+                        }
+                        if (commands[0] == "/spawnguard")
+                        {
+                            Event.Sender.sendMessage("SpawnGuard Main Menu:");
+                            Event.Sender.sendMessage("/spawnguard - Shows this Menu.");
+                            Event.Sender.sendMessage("/spawnstart - Designate the top left corner of the protected zone.");
+                            Event.Sender.sendMessage("/spawnend - Designate the bottom right corner of the protected zone.");
+                            Event.Sender.sendMessage("/perms - Shows what permissions group you belong to.");
+                            Event.Sender.sendMessage("/perm <name> <group> - Sets a players permissions group.");
                         }
                         if (commands[0] == "/spawnstart" && Event.Sender.Op && spawnstartcommand == "unused" && spawnendcommand == "unused")
                         {
