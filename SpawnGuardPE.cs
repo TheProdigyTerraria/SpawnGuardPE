@@ -102,6 +102,10 @@ namespace SpawnGuardPE
                                 {
                                     playerperm = "officer";
                                 }
+                                else
+                                {
+                                    Event.Sender.sendMessage("[SpawnGuardPE]: Invalid command!");
+                                }
                             }
                             XmlTextWriter xmlWriter = new XmlTextWriter(pluginFolder + "/Permissions,xml", null);
                             xmlWriter.WriteStartDocument();
@@ -169,11 +173,8 @@ namespace SpawnGuardPE
             }
             if (playerperm == "guest")
             {
-                if (tiley > spawnystart && tiley < spawnyend)
-                {
                 Event.Sender.sendMessage(warntext, 255, 255f, 0f, 0f);
                 Event.Cancelled = true;
-                }
             }
             if (tilex > spawnxstart && tilex < spawnxend && playerperm == "builder")
             {
