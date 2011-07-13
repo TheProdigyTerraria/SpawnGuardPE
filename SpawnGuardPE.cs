@@ -59,8 +59,10 @@ namespace SpawnGuardPE
             FileStream readStream = new FileStream(pluginFolder + "/AreaBank.dat", FileMode.Open);
             BinaryReader readBinary = new BinaryReader(readStream);
             spawnnumber = readBinary.ReadInt32();
+            userperm = readBinary.ReadString();
             readStream.Close();
             readBinary.Close();
+            string userpermdefault = userperm;
 
             FileStream readA = new FileStream(pluginFolder + "/SpawnAreas/Area1.dat", FileMode.Open);
             BinaryReader readAa = new BinaryReader(readA);
@@ -214,6 +216,7 @@ namespace SpawnGuardPE
                         FileStream AreaBank = new FileStream(pluginFolder + "/AreaBank.dat", FileMode.Create, FileAccess.ReadWrite);
                         BinaryWriter AreaBankWriter = new BinaryWriter(AreaBank);
                         AreaBankWriter.Write(spawnnumber);
+                        //AreaBankWriter.Write(userpermdefault);
                         AreaBank.Close();
                     }
                     if (commands[0] == "/spawnemptyall" && Event.Sender.Op && commands[1] == "verify")
@@ -303,8 +306,20 @@ namespace SpawnGuardPE
                         if (Event.Sender.Op)
                         {
                             Event.Sender.sendMessage("/spawnperms <player name> <group> - Sets a players permissions group.");
+                            Event.Sender.sendMessage("/spawnpermd <group name> - Sets the default permissions group.");
                         }
                         Event.Sender.sendMessage("/spawnpermh - Shows the permissions groups and what they can do.");
+                    }
+                    if (commands[0] == "/spawnpermd" && Event.Sender.Op)
+                    {
+                        string userpermdefault = commands[1];
+                        Event.Sender.sendMessage("Default Group set to: '" + userpermdefault + "'");
+                        Event.Sender.sendMessage("Requires a server restart to take effect.");
+                        FileStream AreaBank = new FileStream(pluginFolder + "/AreaBank.dat", FileMode.Create, FileAccess.ReadWrite);
+                        BinaryWriter AreaBankWriter = new BinaryWriter(AreaBank);
+                        AreaBankWriter.Write(spawnnumber);
+                        AreaBankWriter.Write(userpermdefault);
+                        AreaBank.Close();
                     }
                     if (commands[0] == "/spawnpermh")
                     {
