@@ -53,7 +53,7 @@ namespace SpawnGuardPE
             Description = "Protects your spawn area.";
             Author = "Huey";
             Version = "1";
-            TDSMBuild = 29;
+            TDSMBuild = 31;
 
             AddCommand("spawnguard")
                 .WithAccessLevel(AccessLevel.PLAYER)
@@ -117,7 +117,7 @@ namespace SpawnGuardPE
                 .Calls(SpawnPermS);
             AddCommand("spawnmessage")
                 .WithAccessLevel(AccessLevel.OP)
-                .WithDescription("Sets the spawn message. Buggy.")
+                .WithDescription("Sets the spawn message.")
                 .WithHelpText("/spawnmessage message spaces allowed")
                 .Calls(SpawnMessage);
             AddCommand("spawnlist")
@@ -125,6 +125,11 @@ namespace SpawnGuardPE
                 .WithDescription("Shows the current protected areas and their coordinates.")
                 .WithHelpText("/spawnlist")
                 .Calls(SpawnList);
+            AddCommand("spawnstart")
+                .WithAccessLevel(AccessLevel.OP)
+                .WithDescription("Failsafe to tell players they inputed wrong.")
+                .WithHelpText("/spawnstart")
+                .Calls(SpawnStart);
 
             string pluginFolder = Statics.PluginPath + Path.DirectorySeparatorChar + Name;
             //Create folder if it doesn't exist
@@ -133,7 +138,6 @@ namespace SpawnGuardPE
             BinaryReader readBinary = new BinaryReader(readStream);
             spawnnumber = readBinary.ReadInt32();
             userperm = readBinary.ReadString();
-            readStream.Close();
             readBinary.Close();
             string userpermdefault = userperm;
 
@@ -146,7 +150,6 @@ namespace SpawnGuardPE
             warntext = readAa.ReadString();
             spawnname1 = readAa.ReadString();
             readA.Close();
-            readAa.Close();
             FileStream readB = new FileStream(pluginFolder + "/SpawnAreas/Area2.dat", FileMode.Open);
             BinaryReader readBa = new BinaryReader(readB);
             spawnxstart2 = readBa.ReadInt32();
@@ -156,7 +159,6 @@ namespace SpawnGuardPE
             warntext = readBa.ReadString();
             spawnname2 = readBa.ReadString();
             readB.Close();
-            readBa.Close();
             FileStream readC = new FileStream(pluginFolder + "/SpawnAreas/Area3.dat", FileMode.Open);
             BinaryReader readCa = new BinaryReader(readC);
             spawnxstart3 = readCa.ReadInt32();
@@ -165,8 +167,7 @@ namespace SpawnGuardPE
             spawnyend3 = readCa.ReadInt32();
             warntext = readCa.ReadString();
             spawnname3 = readCa.ReadString();
-            readC.Close();
-            readCa.Close();
+            readC.Close(); 
 
 
 
@@ -188,6 +189,11 @@ namespace SpawnGuardPE
         {
             Console.WriteLine("[SPAWNGUARDPE] Powering Down...");
             isEnabled = false;
+        }
+        public void SpawnStart(Server server, ISender sender, ArgumentList args)
+        {
+            sender.sendMessage("You put a space between /spawnstart and the number.");
+            sender.sendMessage("Type it like this: '/spawnstart1' but with the number you want.");
         }
         public void SpawnMenu(Server server, ISender sender, ArgumentList args)
         {
@@ -292,29 +298,56 @@ namespace SpawnGuardPE
         public void SpawnStart1(Server server, ISender sender, ArgumentList args)
         {
             spawnnumber = 1;
-            spawnname1 = args[0].ToString();
+            try
+            {
+                spawnname1 = args[0].ToString();
+            }
+            catch
+            {
+                sender.sendMessage("You need to input a name for the protected zone.");
+                goto NONAME1;
+            }
             spawnstartcommand = "using";
             spawnstartuser = sender.Name;
             sender.sendMessage("Please destroy the block which will be the top left corner.");
             sender.sendMessage("NOTE: The Spawn Protection will begin AFTER the block destroyed.");
+        NONAME1: ;
         }
         public void SpawnStart2(Server server, ISender sender, ArgumentList args)
         {
             spawnnumber = 2;
-            spawnname2 = args[0].ToString();
+            try
+            {
+                spawnname2 = args[0].ToString();
+            }
+            catch
+            {
+                sender.sendMessage("You need to input a name for the protected zone.");
+                goto NONAME2;
+            }
             spawnstartcommand = "using";
             spawnstartuser = sender.Name;
             sender.sendMessage("Please destroy the block which will be the top left corner.");
             sender.sendMessage("NOTE: The Spawn Protection will begin AFTER the block destroyed.");
+        NONAME2: ;
         }
         public void SpawnStart3(Server server, ISender sender, ArgumentList args)
         {
             spawnnumber = 3;
-            spawnname3 = args[0].ToString();
+            try
+            {
+                spawnname3 = args[0].ToString();
+            }
+            catch
+            {
+                sender.sendMessage("You need to input a name for the protected zone.");
+                goto NONAME3;
+            }
             spawnstartcommand = "using";
             spawnstartuser = sender.Name;
             sender.sendMessage("Please destroy the block which will be the top left corner.");
             sender.sendMessage("NOTE: The Spawn Protection will begin AFTER the block destroyed.");
+        NONAME3: ;
         }
         public void SpawnEnd(Server server, ISender sender, ArgumentList args)
         {
@@ -354,6 +387,12 @@ namespace SpawnGuardPE
         }
         public void SpawnPermC(Server server, ISender sender, ArgumentList args)
         {
+            user = sender.Name.ToString().Replace(" ", "").ToLower();
+            FileStream primerread = new FileStream(pluginFolder + "/PlayerPerms/" + user + ".dat", FileMode.Open);
+            BinaryReader binaryprimer = new BinaryReader(primerread);
+            primer = binaryprimer.ReadInt32();
+            userperm = binaryprimer.ReadString();
+            binaryprimer.Close();
             sender.sendMessage("User: " + user + ". Permissions Group: " + userperm + ".");
         }
         public void SpawnPermS(Server server, ISender sender, ArgumentList args)
@@ -435,9 +474,25 @@ namespace SpawnGuardPE
         }
         public void SpawnMessage(Server server, ISender sender, ArgumentList args)
         {
-            spawnin = args.ToString();
-            char[] arr = new char[] { '/', 's', 'p', 'a', 'w', 'n', 'm', 'e', 'a', 'g', ' ' };
-            warntext = spawnin.TrimStart(arr);
+            int i = 0;
+            spawnin = "";
+                MESSAGELOOP: ;
+            try
+            {
+                spawnin += args[i];
+                spawnin += " ";
+                i = i + 1;
+                goto MESSAGELOOP;
+            }
+            catch
+            {
+                i = 0;
+                warntext = spawnin;
+                spawnin = "";
+            }
+
+            //char[] arr = new char[] { '/', 's', 'p', 'a', 'w', 'n', 'm', 'e', 'a', 'g', ' ' };
+            //warntext = spawnin.TrimStart(arr);
             sender.sendMessage("Warn Text set to: '" + warntext + "'");
 
             FileStream BinaryFile = new FileStream(pluginFolder + "/SpawnAreas/Area1.dat", FileMode.Create, FileAccess.ReadWrite);
@@ -449,6 +504,7 @@ namespace SpawnGuardPE
             Writer.Write(spawnyend1);
             Writer.Write(warntext);
             Writer.Write(spawnname1);
+            Writer.Close();
 
             FileStream BinaryFile1 = new FileStream(pluginFolder + "/SpawnAreas/Area2.dat", FileMode.Create, FileAccess.ReadWrite);
             BinaryWriter Writer1 = new BinaryWriter(BinaryFile1);
@@ -459,6 +515,7 @@ namespace SpawnGuardPE
             Writer1.Write(spawnyend2);
             Writer1.Write(warntext);
             Writer1.Write(spawnname2);
+            Writer1.Close();
 
             FileStream BinaryFile2 = new FileStream(pluginFolder + "/SpawnAreas/Area3.dat", FileMode.Create, FileAccess.ReadWrite);
             BinaryWriter Writer2 = new BinaryWriter(BinaryFile2);
@@ -469,6 +526,7 @@ namespace SpawnGuardPE
             Writer2.Write(spawnyend3);
             Writer2.Write(warntext);
             Writer2.Write(spawnname3);
+            Writer2.Close();
         }
         public void SpawnList(Server server, ISender sender, ArgumentList args)
         {
@@ -480,7 +538,7 @@ namespace SpawnGuardPE
         {
             try
             {
-                user = Event.Player.Name.ToLower();
+                user = Event.Sender.Name.ToString().Replace(" ", "").ToLower();
                 FileStream primerread = new FileStream(pluginFolder + "/PlayerPerms/" + user + ".dat", FileMode.Open);
                 BinaryReader binaryprimer = new BinaryReader(primerread);
                 primer = binaryprimer.ReadInt32();
@@ -517,6 +575,12 @@ namespace SpawnGuardPE
             breakx = (int)Event.Position.X;
             breaky = (int)Event.Position.Y;
             string tileid = Event.Tile.Type.ToString();
+            user = Event.Sender.Name.ToString().Replace(" ", "").ToLower();
+            FileStream primerread = new FileStream(pluginFolder + "/PlayerPerms/" + user + ".dat", FileMode.Open);
+            BinaryReader binaryprimer = new BinaryReader(primerread);
+            primer = binaryprimer.ReadInt32();
+            userperm = binaryprimer.ReadString();
+            binaryprimer.Close();
             if (userperm == "guest" && Event.Sender.Op == false)
             {
                 if (used == "no")
